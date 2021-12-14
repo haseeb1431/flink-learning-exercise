@@ -19,6 +19,10 @@ package tutorial
  */
 
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.connectors._
+import org.apache.flink.streaming.connectors.twitter.TwitterSource
+
+import java.util.Properties
 
 /**
  * Skeleton for a Flink Streaming Job.
@@ -33,6 +37,7 @@ import org.apache.flink.streaming.api.scala._
  * method, change the respective entry in the POM.xml file (simply search for 'mainClass').
  */
 object StreamingJob {
+
   def main(args: Array[String]) {
     // set up the streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
@@ -43,6 +48,14 @@ object StreamingJob {
       .sum(1)
 
     counts.print();
+
+    //sample code for twitter API
+    val props = new Properties()
+    props.setProperty(TwitterSource.CONSUMER_KEY, "")
+    props.setProperty(TwitterSource.CONSUMER_SECRET, "")
+    props.setProperty(TwitterSource.TOKEN, "")
+    props.setProperty(TwitterSource.TOKEN_SECRET, "")
+    val streamSource = env.addSource(new TwitterSource(props))
 
     /*
      * Here, you can start creating your execution plan for Flink.
