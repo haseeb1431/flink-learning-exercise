@@ -18,11 +18,11 @@ package tutorial
  * limitations under the License.
  */
 
+import Util.TweetParser
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.connectors._
 import org.apache.flink.streaming.connectors.twitter.TwitterSource
 
-import java.util.Properties
+import java.util.{Properties}
 
 /**
  * Skeleton for a Flink Streaming Job.
@@ -42,20 +42,9 @@ object StreamingJob {
     // set up the streaming execution environment
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    val text = env.socketTextStream("localhost", 9999)
-    val counts = text.map {(m: String) => (m.split(" ")(0), 1) }
-      .keyBy(0)
-      .sum(1)
+    //socketStreamingExample(env)
 
-    counts.print();
-
-    //sample code for twitter API
-    val props = new Properties()
-    props.setProperty(TwitterSource.CONSUMER_KEY, "")
-    props.setProperty(TwitterSource.CONSUMER_SECRET, "")
-    props.setProperty(TwitterSource.TOKEN, "")
-    props.setProperty(TwitterSource.TOKEN_SECRET, "")
-    val streamSource = env.addSource(new TwitterSource(props))
+    TwitterSourceExample(env)
 
     /*
      * Here, you can start creating your execution plan for Flink.
@@ -79,5 +68,39 @@ object StreamingJob {
 
     // execute program
     env.execute("Flink Streaming Scala API Skeleton")
+  }
+
+  private def TwitterSourceExample(env: StreamExecutionEnvironment) = {
+    //please set the keys for your twitter API
+    val props = new Properties()
+    props.setProperty(TwitterSource.CONSUMER_KEY, "")
+    props.setProperty(TwitterSource.CONSUMER_SECRET, "")
+    props.setProperty(TwitterSource.TOKEN, "")
+    props.setProperty(TwitterSource.TOKEN_SECRET, "")
+
+
+    //Todo: parse the tweet, then filter it, then apply some other transformations and share the code
+    //https://github.com/haseeb1431/flink-examples/blob/50e14ea4d2fc6483b0a5e59c4cbd52e83a231eb9/src/main/java/myflink/TwitterStreaming.java#L55
+    //Assignment for the twitter
+    //Filter, flatmap, map, keyby, coflatmap, richflatmap
+
+    val streamSource: DataStream[String] = env.addSource(new TwitterSource(props))
+
+    val tweets = streamSource
+      .flatMap(new TweetParser)
+      .map { (t) => (t.source, 1) }
+      .keyBy(_._1)
+      .sum(1)
+
+    tweets.print()
+  }
+
+  private def socketStreamingExample(env: StreamExecutionEnvironment) = {
+    val text = env.socketTextStream("localhost", 9999)
+    val counts = text.map { (m: String) => (m.split(" ")(0), 1) }
+      .keyBy(0)
+      .sum(1)
+
+    counts.print();
   }
 }
