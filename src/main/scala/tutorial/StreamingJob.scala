@@ -18,11 +18,17 @@ package tutorial
  * limitations under the License.
  */
 
+import Models.CabRide
 import Util.TweetParser
+import Sources.CabEventSource
+import org.apache.flink.api.common.functions.{MapFunction, RichFlatMapFunction}
+import org.apache.flink.api.common.state.{ValueState, ValueStateDescriptor}
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.twitter.TwitterSource
+import org.apache.flink.util.Collector
 
-import java.util.{Properties}
+import java.util.Properties
 
 /**
  * Skeleton for a Flink Streaming Job.
@@ -43,8 +49,7 @@ object StreamingJob {
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
     //socketStreamingExample(env)
-
-    TwitterSourceExample(env)
+    //TwitterSourceExample(env)
 
     /*
      * Here, you can start creating your execution plan for Flink.
@@ -66,8 +71,53 @@ object StreamingJob {
      *
      */
 
+    //CabRieExample(env);
+
+    env
+      .addSource(new CabEventSource())
+
+
     // execute program
     env.execute("Flink Streaming Scala API Skeleton")
+  }
+
+  def CabRieExample(environment: StreamExecutionEnvironment): Unit ={
+//    val taxiDS = environment.socketTextStream("localhost", 9999)
+//
+//    taxiDS
+//      .flatMap{str => str.split(" ")}
+//      .print();
+
+    environment
+      .addSource(new CabEventSource())
+      .filter({cr => !(cr.dropLocation.isEmpty && cr.pickLocation.isEmpty)})
+      .map(new MapFunction[CabRide,String] {
+        override def map(t: CabRide): String = t.toString
+      })
+      .flatMap(new RichFlatMapFunction[String, String] {
+
+        var sum: ValueState[Int] = _
+
+        override def open(parameters: Configuration): Unit = {
+          sum = getRuntimeContext.getState(
+            new ValueStateDescriptor[Int]("nameOfState", createTypeInformation[Int]))
+        }
+
+        override def flatMap(in: String, collector: Collector[String]): Unit = {
+          var values = sum.value();
+          collector.collect(in)
+          sum.update(Integer.parseInt(in))
+        }
+
+
+      })
+      .print();
+
+
+    //    Print the data as is - Done
+    //    Map each row to a TaxiRide object (create an object)
+    //    Filter map each row to a TaxiRide object where only pick and drop locations are available
+    //    Filter the rows where the start or end location is missing
   }
 
   private def TwitterSourceExample(env: StreamExecutionEnvironment) = {
