@@ -1,0 +1,5 @@
+output_path: "output"
+symbol: "btcusdt"
+half_life: !!java.lang.Long 2000
+sample_period: !!java.lang.Long 1000
+checkPoint_interval: !!java.lang.Long 30000

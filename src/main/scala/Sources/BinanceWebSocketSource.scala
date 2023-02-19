@@ -7,15 +7,13 @@ import org.java_websocket.client.WebSocketClient
 import org.java_websocket.handshake.ServerHandshake
 import play.api.libs.json.Json
 
-class BinanceWebSocketSource(apiKey: String, secretKey: String, symbol: String) extends SourceFunction[BinanceBookTicker] {
+class BinanceWebSocketSource(symbol: String) extends SourceFunction[BinanceBookTicker] {
 
   @volatile private var running = true
 
   override def run(ctx: SourceContext[BinanceBookTicker]): Unit = {
 
-    //val url = s"wss://stream.binance.com:443/ws/${symbol.toLowerCase}@bookTicker"
-    //val url = s"wss://ws-api.binance.com:443/ws-api/v3/${symbol.toLowerCase}@bookTicker"
-    var url = s"wss://fstream.binance.com/ws/${symbol.toLowerCase}@bookTicker" //?listenKey=${apiKey}"
+    var url = s"wss://fstream.binance.com/ws/${symbol.toLowerCase}@bookTicker"
 
     val ws = new WebSocketClient(new java.net.URI(url)) {
       override def onOpen(handshakedata: ServerHandshake): Unit = {
