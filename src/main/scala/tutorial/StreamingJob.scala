@@ -51,25 +51,6 @@ object StreamingJob {
     //socketStreamingExample(env)
     //TwitterSourceExample(env)
 
-    /*
-     * Here, you can start creating your execution plan for Flink.
-     *
-     * Start with getting some data from the environment, like
-     *  env.readTextFile(textPath);
-     *
-     * then, transform the resulting DataStream[String] using operations
-     * like
-     *   .filter()
-     *   .flatMap()
-     *   .join()
-     *   .group()
-     *
-     * and many more.
-     * Have a look at the programming guide:
-     *
-     * https://flink.apache.org/docs/latest/apis/streaming/index.html
-     *
-     */
 
     //CabRieExample(env);
 
